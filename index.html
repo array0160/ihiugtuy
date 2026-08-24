@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>BookOCR Browser UVDoc Test</title>
+</head>
+<body>
+  <main id="app">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Browser-only prototype</div>
+        <h1>BookOCR · UVDoc 網頁展平測試</h1>
+        <p>
+          不使用 Python、不連你的電腦 server。照片在目前瀏覽器中處理。
+          這一版只驗證我們前處理的第一關：跨頁切割與 UVDoc 展平。
+        </p>
+      </div>
+      <div class="privacy">本機瀏覽器推理</div>
+    </header>
+
+    <section class="card">
+      <label id="dropZone" class="drop-zone">
+        <input id="fileInput" type="file" accept="image/*" hidden />
+        <img id="photoPreview" alt="原始跨頁照片" />
+        <div id="dropHint" class="drop-hint">
+          <strong>點擊或拖曳一張「一次拍左右兩頁」的照片</strong>
+          <span>頁面本來就可以歪、彎、帶透視。</span>
+        </div>
+      </label>
+    </section>
+
+    <section class="controls">
+      <div class="control">
+        <label for="splitRange">
+          書脊位置
+          <b id="splitValue">50.0%</b>
+        </label>
+        <input id="splitRange" type="range" min="38" max="62" value="50" step="0.5" />
+      </div>
+
+      <div class="control">
+        <label for="gutterRange">
+          忽略中央書脊
+          <b id="gutterValue">1.5%</b>
+        </label>
+        <input id="gutterRange" type="range" min="0" max="8" value="1.5" step="0.5" />
+      </div>
+
+      <div class="control info-control">
+        <span>模型</span>
+        <b>UVDoc ONNX</b>
+        <small>第一次約需下載 30 MB；之後使用瀏覽器快取。</small>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button id="splitBtn" class="secondary" disabled>1. 預覽左右頁</button>
+      <button id="runBtn" disabled>2. 瀏覽器 UVDoc 展平</button>
+      <button id="clearCacheBtn" class="ghost">清除模型快取</button>
+    </section>
+
+    <section class="progress-card card">
+      <div class="progress-top">
+        <strong id="status">等待照片。</strong>
+        <span id="runtimeBadge">WASM / Browser</span>
+      </div>
+      <div class="progress-track">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <div id="detail" class="detail"></div>
+    </section>
+
+    <section class="stage">
+      <div class="stage-heading">
+        <h2>1. 切頁結果</h2>
+        <p>先確認書脊位置正確。傳統直書書籍：右頁先讀，左頁後讀。</p>
+      </div>
+
+      <div class="grid two">
+        <article class="card result-card">
+          <h3>右頁 · BEFORE</h3>
+          <div class="canvas-wrap">
+            <canvas id="rightBefore"></canvas>
+            <div class="empty" id="rightBeforeEmpty">尚未切頁</div>
+          </div>
+        </article>
+
+        <article class="card result-card">
+          <h3>左頁 · BEFORE</h3>
+          <div class="canvas-wrap">
+            <canvas id="leftBefore"></canvas>
+            <div class="empty" id="leftBeforeEmpty">尚未切頁</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="stage-heading">
+        <h2>2. UVDoc 展平結果</h2>
+        <p>
+          這兩張要拿去跟你剛才 Colab 的 <code>right_flat</code> /
+          <code>left_flat</code> 比。現在先完全不做 OCR。
+        </p>
+      </div>
+
+      <div class="grid two">
+        <article class="card result-card">
+          <div class="result-title">
+            <h3>右頁 · AFTER</h3>
+            <button id="saveRight" class="mini" disabled>下載圖片</button>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="rightAfter"></canvas>
+            <div class="empty" id="rightAfterEmpty">等待 UVDoc</div>
+          </div>
+        </article>
+
+        <article class="card result-card">
+          <div class="result-title">
+            <h3>左頁 · AFTER</h3>
+            <button id="saveLeft" class="mini" disabled>下載圖片</button>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="leftAfter"></canvas>
+            <div class="empty" id="leftAfterEmpty">等待 UVDoc</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="card note">
+      <h2>這一版的驗收標準</h2>
+      <p>
+        不要求完美掃描器效果。只看原本靠書脊彎曲、整頁梯形、文字欄傾斜的程度，
+        是否跟 Colab UVDoc 一樣有明顯改善。如果這關接近，我們下一版才搬
+        PP-OCRv5 detector → PCA 中心線 → V3 remap 分欄。
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
